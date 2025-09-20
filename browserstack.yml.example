@@ -1,0 +1,21 @@
+userName: YOUR_BROWSERSTACK_USERNAME
+accessKey: YOUR_BROWSERSTACK_ACCESS_KEY
+
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: Chrome
+    browserVersion: latest
+  - os: OS X
+    osVersion: Ventura
+    browserName: Safari
+    browserVersion: latest
+  - deviceName: iPhone 13
+    osVersion: 15
+    browserName: Safari
+    deviceOrientation: portrait
+
+browserstackLocal: false
+buildName: testathon-build-1
+projectName: Testathon Project
+

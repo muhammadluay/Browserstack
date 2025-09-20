@@ -1,0 +1,132 @@
+Title,Description,Preconditions,Steps,Expected Result,Priority,Tags
+"Select and record target browsers/devices","Document target desktop and mobile browsers/devices for this run, and ensure one mobile run has geolocation explicitly allowed.
+Automation: manual documentation step; use BrowserStack capabilities to select platforms.","BrowserStack credentials configured; Ability to edit test plan.","1) Choose at least one desktop and one mobile from the target matrix.
+2) Ensure one mobile configuration enables geolocation (allow permission).
+3) Record selected desktop and mobile choices in the run notes.","Selections recorded with at least one desktop and one mobile; one mobile run explicitly has geolocation allowed.",Low,"planning, matrix, area:Web/Matrix"
+"macOS Sonoma Safari/Chrome — homepage renders","Run homepage smoke on macOS Sonoma Safari 17+ and Chrome (latest) to establish baseline rendering.
+Automation: use selenium-python/tests/test_render.py::test_homepage_renders_key_elements with macOS capabilities, or manual check.","BrowserStack credentials configured; macOS Safari/Chrome capabilities available.","1) Configure capabilities for macOS Sonoma Safari 17+ and Chrome (latest).
+2) Open https://testathon.live/.
+3) Wait for document.readyState === 'complete'.
+4) Locate '#__next' and 'footer' elements.
+5) Read non-empty page title.","Homepage loads; '#__next' and 'footer' present; title non-empty on both Safari and Chrome.",Medium,"smoke, cross-browser, macos, area:Web/Compatibility"
+"iOS 17 Safari — homepage renders","Validate homepage loads and is interactive on iOS 17 Safari (and optionally Chrome for parity).
+Automation: adapt selenium capabilities for iOS Safari; otherwise manual.","BrowserStack App Automate/Live for iOS Safari; Site reachable.","1) Launch iOS 17 device (e.g., iPhone 15 Pro) with Safari.
+2) Open https://testathon.live/.
+3) Wait for page load and basic interactivity.
+4) Verify main content visible and no critical layout break.","Homepage renders without critical issues on iOS Safari.",Medium,"mobile, ios, cross-browser, area:Web/Compatibility"
+"Android 14 Chrome — homepage renders","Validate homepage loads and is interactive on Android 14 Chrome (optionally Firefox).
+Automation: adapt selenium capabilities for Android; otherwise manual.","BrowserStack App Automate/Live for Android Chrome; Site reachable.","1) Launch Android 14 device (e.g., Pixel 8 Pro) with Chrome.
+2) Open https://testathon.live/.
+3) Wait for page load and interactivity.
+4) Verify main content visible and no critical layout break.","Homepage renders without critical issues on Android Chrome.",Medium,"mobile, android, cross-browser, area:Web/Compatibility"
+"Mobile geolocation allowed on /offers (rounded coords)","Ensure a mobile run explicitly allows geolocation and /offers uses rounded integer coordinates in its API request.
+Automation: selenium-python/tests/test_offers_geolocation.py::test_offers_uses_geo_and_rounds_when_allowed", "BrowserStack mobile session with geolocation permission allowed; Logged-in session or seeded sessionStorage.username.","1) Start a mobile session with geolocation enabled.
+2) Seed login or use a logged-in user.
+3) Navigate to https://testathon.live/offers.
+4) Observe offers API call in Network; capture 'latitude' and 'longitude' params.","Permission prompt appears (or auto-allowed); offers API request includes integer latitude/longitude; request succeeds (or 404 with empty cityName).",High,"offers, geolocation, mobile, area:Web/Offers"
+"Identify valid username(s) for /api/signin","Probe what counts as a valid username on the live site, or document that none are accepted.
+Automation: selenium-python/tests/test_login.py (if TEST_USER_* set) or manual curl probe.","Site reachable; Optionally configure TEST_USER_* and TEST_USER_PASSWORD in .env.","1) Attempt POST https://testathon.live/api/signin with candidate usernames.
+2) Observe status codes and errorMessage.
+3) Optionally try UI sign-in on /signin.
+4) Record any username yielding 200; if none, document that all attempts return 422.","At least one valid username identified (200) or documented that no usernames are accepted (422 with errorMessage).",Medium,"auth, api, area:API/Auth"
+"Product cards show title, price, and Add to cart control","Validate product cards render with a visible title and price; verify an 'Add to cart' control is available (on card or upon hover/product detail).
+Automation: selenium-python/tests/test_catalog_ui.py", "Target site reachable; Desktop session available.","1) Open https://testathon.live/.
+2) Wait for products to load.
+3) Inspect first visible product card for a non-empty title and price.
+4) Hover the card; locate an 'Add to cart' control on the card or click into product detail to locate an 'Add to cart' control there.","Each product card has a visible title and price; an 'Add to cart' control is available on card or detail.",High,"catalog, ui, area:Web/Catalog"
+"Cart badge/total updates and persists across reload","Adding an item updates cart badge/total and persists after a page reload.
+Automation: selenium-python/tests/test_cart_badge_persistence.py", "Logged-in session or sessionStorage.username seeded; Target site reachable.","1) Open homepage and clear storage.
+2) Seed sessionStorage.username (if needed).
+3) Click an 'Add to cart' button.
+4) Observe cart badge/total increase or storage-based count increase.
+5) Reload the page and verify the badge/total (or storage count) persists.","Cart indicator or storage-backed count increases after add and remains increased after reload.",High,"cart, persistence, area:Web/Cart"
+"Checkout sets confirmation state and clears cart","After a checkout, ensure cart is cleared, sessionStorage.confirmationProducts and confirmationTotal are set, and redirect to /confirmation occurs.
+Automation: selenium-python/tests/test_checkout_orders.py::test_checkout_flow_confirmation_and_orders", "Logged-in session or seeded sessionStorage.username; Network to call /api/checkout.","1) Build a pseudo-cart (e.g., from /api/products) or add items via UI.
+2) POST /api/checkout with userName.
+3) Seed confirmationProducts and confirmationTotal to mimic client behavior if needed.
+4) Visit /confirmation and verify receipt context.
+5) Confirm cart is cleared post-confirmation.","/confirmation renders with receipt context; confirmationProducts/confirmationTotal set; cart cleared.",High,"checkout, orders, session, area:Web/Checkout"
+"Offers UI handles denied geolocation gracefully","When geolocation is blocked/denied, /offers should remain stable and communicate gracefully (no crash).
+Automation: selenium-python/tests/test_offers_favourites.py::test_offers_ui_logged_in_without_geo_permission_is_stable", "Logged-in session or seeded sessionStorage.username; Ability to deny geolocation.","1) Ensure logged-in session.
+2) Deny geolocation permission for the session.
+3) Navigate to https://testathon.live/offers.
+4) Verify page remains on /offers and renders a stable state.","/offers stays stable; either shows offers UI or a graceful error/empty state; no crash.",Medium,"offers, geolocation, negative, area:Web/Offers"
+"Favourites toggle persists within session","Favourite a product while logged in and verify it persists on /favourites and across reload within the session.
+Automation: selenium-python/tests/test_favourites_persist.py::test_favourite_toggle_persists_in_session", "Logged-in session or seeded sessionStorage.username; Site reachable.","1) Seed login and navigate to homepage.
+2) Toggle favourite on the first product.
+3) Navigate to /favourites and count items.
+4) Reload and verify count remains the same.","Favourite selection persists in session and is visible on /favourites across reload.",Medium,"favourites, persistence, area:Web/Favourites"
+"Favourites behavior logged-out vs logged-in","Verify logged-out favourite click redirects to /signin?favourites=true; logged-in favourite toggle updates product card and /favourites.
+Automation: selenium-python/tests/test_favourites.py", "Site reachable.","1) Logged-out: navigate to homepage and click a favourite toggle; expect redirect to /signin?favourites=true.
+2) Logged-in: seed sessionStorage.username; click favourite toggle; verify /favourites lists the item.","Logged-out click redirects to /signin with favourites=true; logged-in toggle updates favourites and persists for the session.",Medium,"favourites, auth, area:Web/Favourites"
+"/favicon.svg loads","Confirm favicon served correctly.
+Automation: manual or small script (requests).", "Site reachable.","1) Request https://testathon.live/favicon.svg.
+2) Verify HTTP 200 and SVG/XML content type.","/favicon.svg returns 200 with a valid SVG content type.",Low,"static, assets, area:Web/Static"
+"Protected routes redirect to /signin with flag","Unauthenticated access to protected pages redirects to /signin with the correct query parameter.
+Automation: selenium-python/tests/test_auth_redirects.py::test_redirects_when_not_logged_in", "Site reachable; Clean session (no sessionStorage.username).","1) Visit each of /offers, /orders, /checkout, /favourites while logged out.
+2) Observe redirect to /signin?{flag}=true where {flag} matches the page.","Each protected route redirects to /signin with the correct flag (offers/orders/checkout/favourites).",High,"auth, redirect, negative, area:Web/Routing"
+"Empty cart checkout redirects home","Visiting /checkout with an empty cart redirects to home (not stuck on /checkout).
+Automation: selenium-python/tests/test_checkout_orders.py::test_checkout_with_empty_cart_redirects_home", "Logged-in session or seeded sessionStorage.username; Empty cart.","1) Ensure sessionStorage.username is set; cart is empty.
+2) Navigate to /checkout.
+3) Observe redirect to home.","/checkout redirects to home when cart is empty.",High,"checkout, negative, area:Web/Checkout"
+"Direct /confirmation without state is safe","Navigating directly to /confirmation without confirmation session state should be safe (no crash).
+Automation: selenium-python/tests/test_unhappy_ui.py::test_confirmation_without_state_is_safe", "Site reachable; Clean storage.","1) Clear sessionStorage/localStorage.
+2) Navigate to /confirmation directly.
+3) Verify page renders safely (empty/safe state) without crashing.","/confirmation handles missing session state gracefully; no crash.",Medium,"negative, confirmation, area:Web/Routing"
+"Swagger edge path returns 404","Accessing /swagger/nope returns a 404 while /swagger root loads normally.
+Automation: selenium-python/tests/test_unhappy_ui.py::test_misc_404s", "Site reachable.","1) Navigate to /swagger/nope and verify 404/Not Found.
+2) Optionally verify /swagger loads the UI.","/swagger/nope returns 404; /swagger loads the API UI.",Low,"swagger, negative, area:Web/Routing"
+"OpenAPI JSON endpoints return 404","/openapi.json and /swagger.json should not be publicly exposed; return 404.
+Automation: selenium-python/tests/test_unhappy_ui.py::test_misc_404s", "Site reachable.","1) Request /openapi.json and /swagger.json.
+2) Observe 404 responses (JSON or HTML), not 500.","Both endpoints return 404 without server error.",Low,"swagger, negative, area:API/Docs"
+"Robots/sitemap endpoints return 404","/robots.txt and /sitemap.xml return 404 as observed (no directory listing).
+Automation: selenium-python/tests/test_unhappy_ui.py::test_misc_404s", "Site reachable.","1) Request /robots.txt and /sitemap.xml.
+2) Verify 404 responses and that no directory listing is exposed.","Endpoints return 404 cleanly with no directory listing.",Low,"static, robots, negative, area:Web/Static"
+"Path quirks do not 500","Case changes, trailing slashes, and double slashes should canonicalize or 404 consistently (no 500s).
+Automation: selenium-python/tests/test_unhappy_ui.py::test_path_quirks_do_not_500", "Site reachable.","1) Visit /Offers, /offers/, and //offers.
+2) Verify either canonical page, redirect, or 404; importantly, no 500.","No server errors; behavior is consistent for path quirks.",Medium,"routing, negative, area:Web/Routing"
+"Sign-in wrong method returns 4xx","Wrong HTTP method on /api/signin should return 4xx (not 200).
+Automation: selenium-python/tests/test_unhappy_api.py::test_signin_wrong_method_returns_4xx", "Site reachable.","1) Send GET to /api/signin.
+2) Verify 4xx status.","GET /api/signin returns 4xx.",Medium,"api, auth, negative, area:API/Auth"
+"Checkout GET returns 4xx/422","GET to /api/checkout should not be allowed; returns 4xx (observed 422).
+Automation: selenium-python/tests/test_unhappy_api.py::test_checkout_get_422_or_4xx", "Site reachable.","1) Send GET to /api/checkout.
+2) Verify status is 422 or other 4xx.","GET /api/checkout returns 422 (or 4xx).",Medium,"api, checkout, negative, area:API/Checkout"
+"Checkout POST invalid usernames return 4xx","POST /api/checkout with missing/empty/whitespace, non-string, or random usernames returns 4xx.
+Automation: selenium-python/tests/test_unhappy_api.py::test_checkout_post_invalid_usernames_4xx", "Site reachable.","1) POST to /api/checkout with {}, {userName:""}, {userName:"   "}, {userName:123}, {userName:["x"]}, {userName:"nouser_<rand>"}.
+2) Verify 4xx for each.","Invalid userName payloads return 4xx.",High,"api, validation, negative, area:API/Checkout"
+"Orders missing/unknown user validation","/api/orders without userName returns 4xx; unknown user returns 404 with { message: 'No orders found' }.
+Automation: selenium-python/tests/test_unhappy_api.py::test_orders_missing_username_4xx and ::test_orders_unknown_user_404", "Site reachable.","1) GET /api/orders without params; expect 4xx.
+2) GET /api/orders?userName=<random>; expect 404 and JSON body with 'No orders found'.","Missing userName yields 4xx; unknown user yields 404 with appropriate message.",High,"api, orders, negative, area:API/Orders"
+"Offers invalid params return 4xx","/api/offers with missing lat/lon, NaN/Infinity, or out-of-range values returns 4xx.
+Automation: selenium-python/tests/test_unhappy_api.py::test_offers_invalid_params_return_4xx", "Site reachable.","1) Send GET /api/offers with various invalid/missing latitude/longitude values.
+2) Verify 4xx for each case.","Invalid/missing latitude/longitude cases return 4xx.",High,"api, offers, validation, area:API/Offers"
+"Offers 0,0 returns 404 with empty cityName","/api/offers with latitude=0 and longitude=0 returns 404 and { cityName: "" }.
+Automation: selenium-python/tests/test_offers_favourites.py::test_offers_api_rounding_and_404", "Site reachable.","1) Send GET /api/offers?userName=<name>&latitude=0&longitude=0.
+2) Verify 404 with JSON and empty cityName.","Status 404 with { cityName: "" } for improbable coords.",Medium,"api, offers, negative, area:API/Offers"
+"Products POST method not allowed","POST /api/products returns 4xx (or 200 on some servers, but should not 500); unknown GET query params are ignored.
+Automation: selenium-python/tests/test_unhappy_api.py::test_products_method_not_allowed_or_4xx", "Site reachable.","1) POST /api/products and record status.
+2) GET /api/products with unknown query params; verify no 500.","POST is 4xx or acceptable 200; GET ignores unknown params; no 500.",Low,"api, products, negative, area:API/Products"
+"Unknown API path returns 404 JSON-ish","Unknown /api/* path returns 404 with JSON or text content type (not HTML index).
+Automation: selenium-python/tests/test_unhappy_api.py::test_unknown_api_returns_404_jsonish", "Site reachable.","1) GET /api/does-not-exist.
+2) Verify 404 and content-type indicates JSON (or text).","404 with appropriate content-type for unknown API paths.",Low,"api, routing, negative, area:API/General"
+"Nonexistent static asset returns clean 404","Requesting a missing static asset returns a clean 404 with no directory listing and no 500.
+Automation: selenium-python/tests/test_unhappy_api.py::test_static_asset_missing_404", "Site reachable.","1) GET /_next/static/does-not-exist.js.
+2) Verify 404 and no directory listing.","Missing asset returns 404 cleanly; no 500.",Low,"static, assets, negative, area:Web/Static"
+"HTTP → HTTPS redirects without loop","Requesting http:// should redirect to https:// with 301/302/307/308 and not loop.
+Automation: selenium-python/tests/test_unhappy_api.py::test_http_to_https_redirect", "Site deployed with HTTPS; HTTP endpoint available.","1) Request http://testathon.live/ with redirects disabled.
+2) Verify 30x status and Location header begins with https://.","HTTP request redirects to HTTPS exactly once (no loop).",Medium,"http, redirect, area:Infra/HTTP"
+"Trailing slash canonicalization is consistent","Adding/removing trailing slash should keep behavior consistent (no duplicate content or 500s).
+Automation: selenium-python/tests/test_unhappy_ui.py::test_path_quirks_do_not_500 (coverage proxy)","Site reachable.","1) Compare /offers and /offers/ (and similar for key pages).
+2) Verify content/behavior is consistent; no 500s.","Consistent behavior without server errors between with/without trailing slash.",Low,"routing, canonicalization, area:Infra/HTTP"
+"Very long path yields graceful status (no 5xx)","A very long path or query yields a graceful 4xx (e.g., 414) or capped handling; must not be 5xx.
+Automation: selenium-python/tests/test_unhappy_api.py::test_very_long_url_not_5xx (xfail acceptable)","Site reachable.","1) Request an excessively long URL path.
+2) Verify response is not 5xx (prefer 4xx).","No 5xx for long path; 4xx or capped handling accepted.",Low,"negative, robustness, area:Infra/HTTP"
+"Content negotiation with Accept: text/plain","Sending Accept: text/plain to JSON endpoints returns JSON or 406; must not 500.
+Automation: selenium-python/tests/test_unhappy_api.py::test_content_negotiation_accept_plain_no_500", "Site reachable.","1) GET /api/products with Accept: text/plain.
+2) Verify status is 200 or 406 (or other 4xx) but not 5xx.","No 5xx; JSON or 406 acceptable.",Low,"api, content-negotiation, area:API/General"
+"HEAD/OPTIONS return sensible statuses","HEAD/OPTIONS on pages and APIs should return 200/204/404/405 as applicable, not 500.
+Automation: selenium-python/tests/test_unhappy_api.py::test_head_options_sensible_status", "Site reachable.","1) Send HEAD and OPTIONS to '/', '/api/products', and '/api/orders'.
+2) Verify statuses are sensible (200/204/404/405).","HEAD/OPTIONS return sensible statuses; no 5xx.",Low,"http, methods, area:Infra/HTTP"
+"Query echo safety (basic XSS sanity)","Benign query payloads like <script> or encoded strings in query params are not reflected unsafely in HTML.
+Automation: manual (DevTools/requests).", "Site reachable.","1) Request a page with a query param containing <script>alert(1)</script> and encoded variants.
+2) Inspect rendered HTML and DOM for unsafe reflections.","No unsafe reflection of query values in HTML; no script execution.",High,"security, xss, negative, area:Security/XSS"

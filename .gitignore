@@ -1,1 +1,85 @@
 .DS_Store
+# Environment files (keep only documented examples tracked)
+.env
+.env.local
+.env.*.local
+.env-e
+.env*
+!.env.example
+!browserstack.yml.example
+# Virtual envs
+.venv/
+venv/
+# Logs
+log/
+*.log
+browserstack.yml
+
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Test reports and CI outputs
+reports/
+junit*.xml
+test-results/
+
+# Generated data files
+crawl_results.json
+crawl_results.csv
+
+# Editor/IDE/OS files
+.idea/
+.vscode/
+*.iml
+.python-version
+
+# BrowserStack Local artifacts
+BrowserStackLocal*
+browserstack-local*.log
+
+# Node/JS (if used)
+node_modules/
+dist/
+build/
+
+# Optional large local docs not needed in repo
+Testathon - Participant Guide.docx
+Testathon - Participant Guide_media/
+
+# Local sample projects (exclude from this repo)
+browserstack-tests/
+
+# Sensitive credentials and keys (prevent accidental commits)
+*.pem
+*.key
+*.p12
+*.p8
+*.der
+*.crt
+*.cer
+*.jks
+*.keystore
+*.gpg
+*.asc
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+.ssh/
+.envrc
+.pypirc
+.npmrc
+.netrc
+.kube/config
+.docker/config.json
+.aws/
+.terraform/
+*.tfstate

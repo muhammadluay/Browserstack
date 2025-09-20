@@ -1,0 +1,52 @@
+Title,Description,Preconditions,Steps,Expected Result,Priority,Tags
+"E2E: Cart → Checkout → Orders; redirects when unauthenticated","End-to-end validation of cart, checkout, and orders history, including redirect behavior for unauthenticated users.
+Automation: (manual or future automation; suggest Playwright e2e)","Target site reachable; optional test user creds available via env; browserstack project configured (optional).","1) As a guest, open /orders, /checkout, and /offers directly.
+2) Verify each protected route redirects to /signin with a relevant query flag (e.g., ?orders=true, ?checkout=true, ?offers=true).
+3) Navigate to homepage and add any product to cart.
+4) Attempt to proceed to checkout; if prompted, sign in.
+5) Complete checkout (place order).
+6) Navigate to /orders and verify the newly placed order appears with correct total and items.","Protected routes redirect unauthenticated users to /signin; After sign-in and checkout, the order appears on /orders with accurate totals and items.",High,"smoke, e2e, cart, checkout, orders, redirects, area:Web/E2E"
+"Negative API scenarios and empty states","Validate UI resilience for API errors (timeouts/5xx), empty responses, and malformed inputs across all endpoints.
+Automation: (manual or future automation; suggest Playwright with route interception or Cypress; API via Newman)","Ability to intercept/mock API or test in an environment that can return 4xx/5xx/timeouts; devtools/network throttling access.","1) For /api/products, /api/orders, /api/offers, /api/checkout, /api/signin, simulate responses: 500, 404, empty body, 30s timeout, and malformed JSON.
+2) Exercise corresponding UI flows (home listing, orders page, offers page with geolocation, sign-in, checkout).
+3) Verify spinners, retries (if any), and user-friendly error banners.
+4) Validate empty states: no products, no orders, no offers — correct copy and accessible rendering.
+5) Submit malformed inputs (e.g., invalid latitude/longitude; unexpected characters in userName).","UI shows consistent, accessible error/empty states; no infinite spinners or console errors; forms validate inputs; app remains usable without data corruption.",High,"negative, api, resilience, error-states, area:Web/Resilience"
+"Auth/session robustness (login, logout, rate-limit, session clearing)","Assess authentication flows and session lifecycle, including invalid credentials, logout, multi-tab behavior, and rate-limiting.
+Automation: (manual or future automation)","Test credentials (valid/invalid) available; ability to observe/sessionStorage.","1) Attempt sign-in with invalid credentials and observe error handling.
+2) Sign in with valid credentials; open protected pages.
+3) Logout; ensure sessionStorage and any tokens are cleared; opening protected pages redirects to /signin.
+4) Multi-tab: sign in on Tab A, open Tab B; logout on Tab B; verify Tab A protected navigation prompts reauth.
+5) Attempt multiple failed logins to verify rate-limiting/lockout (if implemented).","Invalid creds are rejected with clear error; successful login grants access; logout reliably clears session and enforces redirects; multi-tab remains consistent; rate-limiting or safe degradation in place.",High,"auth, session, security, area:Web/Auth"
+"API contract tests and /api/checkout idempotency","Validate JSON schema, status codes, and stable server behavior across APIs; ensure repeated checkout does not create duplicate orders.
+Automation: (manual or future automation; suggest Postman/Newman or Pact for schema)","API reachable; schema defined (OpenAPI/Swagger) or implicit contract agreed.","1) Define/derive schema for /api/products, /api/orders, /api/offers, /api/checkout, /api/signin.
+2) Validate required fields, types, and status codes for success and error paths.
+3) Invoke /api/checkout twice with same payload; verify server responds consistently and does not duplicate orders.
+4) Verify error bodies include machine-readable codes and human-readable messages.","All endpoints conform to schema; errors are consistent; repeated /api/checkout does not create duplicate orders; responses are stable and documented.",High,"api, contract, idempotency, area:API/Contracts"
+"Security checks: headers, CSP/XSS, clickjacking, CSRF posture, TLS/domain hygiene","Baseline application security validation covering headers, injection surfaces, framing, and TLS.
+Automation: (manual or future automation; ZAP Baseline/Lighthouse security + custom scripts)","Ability to fetch/inspect response headers; test pages served over HTTPS; optional staging for active tests.","1) Inspect headers: Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP/CORP.
+2) Attempt to render the app in an <iframe> from another origin; observe if blocked.
+3) XSS probes in any user-reflected surfaces; verify proper sanitization (no script execution).
+4) CSRF posture: if cookies are used for auth, validate CSRF mitigations (tokens/sameSite/origin checks).
+5) TLS/domain: verify http→https redirect, valid certs on apex and www; no mixed content.","Security headers present and correctly configured; framing blocked on sensitive routes; inputs sanitized; CSRF mitigations appropriate; TLS valid on all intended hostnames; no mixed content.",High,"security, headers, xss, clickjacking, csrf, tls, area:Security/AppSec"
+"Accessibility: keyboard-only, landmarks/roles/labels, contrast, SR announcements","Comprehensive a11y checks for WCAG 2.1 AA: navigation, semantics, contrast, and announcements in SPA transitions.
+Automation: (manual with screen readers; automated via axe/lighthouse)","Ability to run axe/lighthouse; screen reader available (NVDA/JAWS/VoiceOver); keyboard-only testing setup.","1) Keyboard-only navigation across all flows; verify visible focus states and escape from modals.
+2) Check landmarks (header/main/footer/nav), ARIA roles, and form label associations.
+3) Validate color contrast for text/buttons (>= 4.5:1 body text; 3:1 large text).
+4) Trigger route changes (SPA) and toast/errors; verify polite/assertive announcements to SR.
+5) Run automated axe and resolve critical/serious violations.","No keyboard traps; correct landmarks/roles/labels; sufficient contrast; SR announcements on dynamic changes; zero critical/serious axe violations.",High,"a11y, wcag, keyboard, contrast, screen-reader, area:UX/Accessibility"
+"Performance budgets and slow-network/CPU-throttling UX","Verify performance under budgets and degraded conditions; ensure graceful UX and minimal layout shifts.
+Automation: (manual or future automation; Lighthouse CI recommended)","Chrome devtools throttling; Lighthouse; budget config (JS, LCP, INP, CLS).","1) Run Lighthouse on key routes (/, /offers, /checkout) with mobile throttling; record LCP/INP/CLS.
+2) Throttle network (Slow 3G) and CPU (4x/6x); verify skeletons/spinners and usable interactions.
+3) Measure total JS/CSS bytes and compare with budgets; identify largest contributors; verify lazy loading.
+4) Confirm CLS < 0.1; LCP < 2.5s (lab) on target devices.","Budgets met or variances documented; UI stays responsive under throttle; minimal CLS; critical routes within performance targets.",High,"performance, lighthouse, budgets, throttling, area:Perf"
+"Cross-browser/device (incl. geolocation prompt behavior)","Ensure consistent behavior across major browsers/devices; validate geolocation permissions on /offers.
+Automation: (manual matrix or BrowserStack Live/Automate)","Access to BrowserStack or equivalent matrix; test accounts; location mocking (optional).","1) Test latest Chrome/Firefox/Safari/Edge on desktop + iOS Safari + Android Chrome.
+2) Validate core flows (home, signin, cart, checkout, orders) and visual layout.
+3) On /offers, test geolocation Allowed, Denied, and Unavailable; verify messages and fallback.
+4) Test responsive breakpoints and touch interactions.","Consistent rendering and interactions; geolocation UX is correct for allow/deny/unavailable; no browser-specific blockers.",High,"cross-browser, mobile, geolocation, responsive, area:Compatibility"
+"SEO: robots/sitemap/meta/canonical; SSR/prerender strategy","Search discoverability checks for robots.txt, sitemap.xml, meta description, canonical URLs, OG/Twitter, and SSR/prerender.
+Automation: (manual or future automation)","Public site accessible; SEO tools (e.g., Screaming Frog) optional.","1) Fetch /robots.txt and /sitemap.xml; validate presence and correctness.
+2) Inspect pages for meta description, canonical link, Open Graph, and Twitter Card tags.
+3) Verify server-side rendered/prerendered critical content or acceptable fallbacks for crawlers.
+4) Check for duplicate content and correct canonicalization.","robots.txt and sitemap.xml present and correct; meta/canonical/OG/Twitter implemented; critical content discoverable; canonicalization prevents duplicates.",High,"seo, indexing, meta, sitemap, canonical, ssr, area:SEO"

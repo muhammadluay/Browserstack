@@ -1,0 +1,30 @@
+Title,Description,Preconditions,Steps,Expected Result,Priority,Tags
+"Homepage renders core elements","Verify homepage loads and core containers are present across browsers.
+Automation: selenium-python/tests/test_render.py::test_homepage_renders_key_elements","BrowserStack credentials configured; Target site reachable; Remote session available.","1) Open https://testathon.live/.
+2) Wait until document.readyState equals 'complete'.
+3) Read the page title.
+4) Locate element with CSS selector '#__next'.
+5) Locate a 'footer' element.","Title is non-empty; '#__next' and 'footer' elements are present in the DOM.",High,"smoke, render, cross-browser, area:Web/Homepage"
+"Page title contains expected substring (optional)","Validate page title policy with optional expected substring via env var.
+Automation: selenium-python/tests/test_smoke.py::test_title_smoke","Optionally set ASSERT_TITLE_CONTAINS to required substring.","1) Open https://testathon.live/.
+2) Read the page title.
+3) If ASSERT_TITLE_CONTAINS is set, assert substring is present; else assert title is non-empty.","If ASSERT_TITLE_CONTAINS is set, title contains it; otherwise title is non-empty.",Medium,"smoke, title, area:Web/Smoke"
+"Add 'iPhone 12' to cart on BrowserStack Demo","Verify adding a specific product to cart on demo store.
+Automation: browserstack-tests/tests/test.py","https://bstackdemo.com/ is reachable.","1) Navigate to https://bstackdemo.com/.
+2) Wait until title contains 'StackDemo'.
+3) Capture product name text for 'iPhone 12'.
+4) Click 'Add to cart' for the same product.
+5) Open cart and read product name in cart.","Product name in cart matches the product clicked (iPhone 12).",Medium,"demo, e2e, area:Demo/Cart"
+"Local testing – verify bs-local test page","Validate BrowserStack Local connectivity via local hub.
+Automation: browserstack-tests/tests/local-test.py","BrowserStack Local tunnel is running; Remote hub at http://localhost:4444/wd/hub is accessible.","1) Create Remote WebDriver pointing to http://localhost:4444/wd/hub.
+2) Open http://bs-local.com:45454.
+3) Read the page title.
+4) Verify it contains 'BrowserStack Local'.","Title contains 'BrowserStack Local'.",Medium,"local, infra, area:Infrastructure/Local"
+"Invalid path shows 404/Not Found page","Ensure users see a 404 page for non-existing routes.
+Automation: (manual or future automation)","Target site deployed with 404 handling.","1) Open a clearly invalid URL under the site (e.g., /this-path-should-not-exist).
+2) Wait for page to render.
+3) Look for '404' or 'Not Found' markers on the page (text or heading).","A 404/Not Found page or message is displayed.",Low,"error-handling, negative, area:Web/Routing"
+"Footer exposes at least one link","Quick content validation that footer contains navigation or utility links.
+Automation: (manual or future automation)","Target site reachable.","1) Open https://testathon.live/.
+2) Locate the footer element.
+3) Count anchor ('a') elements within the footer.","At least one footer link is present.",Low,"content, smoke, area:Web/Footer"
